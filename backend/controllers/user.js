@@ -37,10 +37,10 @@ const register = async (req, res) => {
 
         const cookieOptions = {
             httpOnly:true,
-            expires:new Date(Date.now() + 5 * 24*60*60*1000)
+            expires:new Date(Date.now() + 5 * 24*60*60*1000),
         }
-        
-        res.status(201).cookie("token", token, cookieOptions).json({
+        res.cookie("token", token, cookieOptions)
+        res.status(201).json({
             message: "Kullanıcı başarıyla oluşturuldu",
             user: newUser,
             token
@@ -77,15 +77,16 @@ const login = async (req,res) => {
         const token = generateToken(user._id);
 
         const cookieOptions = {
-            httpOnly:true,
-            expires:new Date(Date.now() + 5 * 24*60*60*1000)
-        }
-        
-        res.status(201).cookie("token", token, cookieOptions).json({
+            httpOnly: true,
+            expires: new Date(Date.now() + 5 * 24*60*60*1000),
+        };
+        res.cookie("token",token,cookieOptions)
+        res.status(201).json({
             message: "Giriş başarıyla yapıldı",
             user,
             token
         });
+       
 
     } catch (error) {
         res.status(500).json({
@@ -99,9 +100,11 @@ const logout = async (req,res) => {
     try {
         const cookieOptions = {
             httpOnly:true,
-            expires:new Date(Date.now())
+            expires:new Date(Date.now()),
         }
-        res.status(200).cookie("token",null,cookieOptions).json({
+
+        res.cookie("token",null,cookieOptions)
+        res.status(200).json({
             message:"Çıkış işlemi başarılı"
         })
     } catch (error) {
@@ -183,10 +186,11 @@ const resetPassword = async (req,res) => {
         const token = generateToken(user._id);
         const cookieOptions = {
             httpOnly:true,
-            expires:new Date(Date.now() + 5 * 24*60*60*1000)
+            expires:new Date(Date.now() + 5 * 24*60*60*1000),
         }
-        
-        res.status(201).cookie("token", token, cookieOptions).json({
+
+        res.cookie("token",token,cookieOptions)
+        res.status(201).json({
             message: "Şifre başarıyla sıfırlandı",
             user,
             token
@@ -198,7 +202,8 @@ const resetPassword = async (req,res) => {
 }
 
 const userDetail = async (req, res, next) => {
-    const user = await User.findById(req.params.id)
+    if(!req?.cookies?.token) return
+    const user = await User.findById(req.user.id)
     try {
         res.status(200).json({
         user,
